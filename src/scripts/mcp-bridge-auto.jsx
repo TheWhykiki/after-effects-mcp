@@ -833,16 +833,18 @@ autoRunCheckbox.value = true;
 var checkInterval = 2000;
 var isChecking = false;
 
-// Command file path
+// Command file path (cross-platform)
 function getCommandFilePath() {
     var tempFolder = Folder.temp;
-    return tempFolder.fsName + "/ae_command.json";
+    var separator = ($.os.indexOf("Windows") !== -1) ? "\\" : "/";
+    return tempFolder.fsName + separator + "ae_command.json";
 }
 
-// Result file path
+// Result file path (cross-platform)
 function getResultFilePath() {
     var tempFolder = Folder.temp;
-    return tempFolder.fsName + "/ae_mcp_result.json";
+    var separator = ($.os.indexOf("Windows") !== -1) ? "\\" : "/";
+    return tempFolder.fsName + separator + "ae_mcp_result.json";
 }
 
 // Functions for each script type

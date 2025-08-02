@@ -32,9 +32,16 @@ function runExtendScript(scriptPath: string, args: Record<string, any> = {}): st
     const argsPath = path.join(TEMP_DIR, "args.json");
     fs.writeFileSync(argsPath, JSON.stringify(args));
 
-    // Find After Effects executable location - modify as needed for your installation
-    // This is a common default location, adjust as necessary
-    const aePath = "C:\\Program Files\\Adobe\\Adobe After Effects 2025\\Support Files\\AfterFX.exe";
+    // Find After Effects executable location - cross-platform paths
+    let aePath: string;
+    if (process.platform === "win32") {
+      aePath = "C:\\Program Files\\Adobe\\Adobe After Effects 2025\\Support Files\\AfterFX.exe";
+    } else if (process.platform === "darwin") {
+      aePath = "/Applications/Adobe After Effects 2025/Adobe After Effects 2025.app/Contents/MacOS/After Effects";
+    } else {
+      // Linux or other platforms
+      throw new Error("After Effects is not supported on this platform");
+    }
     
     // Verify After Effects executable exists
     if (!fs.existsSync(aePath)) {
@@ -82,7 +89,9 @@ alert("Script execution completed");
 // Helper function to read results from After Effects temp file
 function readResultsFromTempFile(): string {
   try {
-    const tempFilePath = path.join(process.env.TEMP || process.env.TMP || '', 'ae_mcp_result.json');
+    // Cross-platform temp directory
+    const tempDir = process.env.TMPDIR || process.env.TEMP || process.env.TMP || '/tmp';
+    const tempFilePath = path.join(tempDir, 'ae_mcp_result.json');
     
     // Add debugging info
     console.error(`Checking for results at: ${tempFilePath}`);
@@ -121,7 +130,8 @@ function readResultsFromTempFile(): string {
 // Helper function to write command to file
 function writeCommandFile(command: string, args: Record<string, any> = {}): void {
   try {
-    const commandFile = path.join(process.env.TEMP || process.env.TMP || '', 'ae_command.json');
+    const tempDir = process.env.TMPDIR || process.env.TEMP || process.env.TMP || '/tmp';
+    const commandFile = path.join(tempDir, 'ae_command.json');
     const commandData = {
       command,
       args,
@@ -138,7 +148,8 @@ function writeCommandFile(command: string, args: Record<string, any> = {}): void
 // Helper function to clear the results file to avoid stale cache
 function clearResultsFile(): void {
   try {
-    const resultFile = path.join(process.env.TEMP || process.env.TMP || '', 'ae_mcp_result.json');
+    const tempDir = process.env.TMPDIR || process.env.TEMP || process.env.TMP || '/tmp';
+    const resultFile = path.join(tempDir, 'ae_mcp_result.json');
     
     // Write a placeholder message to indicate the file is being reset
     const resetData = {
@@ -541,7 +552,8 @@ server.tool(
     try {
       // Generate a unique timestamp
       const timestamp = new Date().getTime();
-      const tempFile = path.join(process.env.TEMP || process.env.TMP || '', `ae_test_${timestamp}.jsx`);
+      const tempDir = process.env.TMPDIR || process.env.TEMP || process.env.TMP || '/tmp';
+      const tempFile = path.join(tempDir, `ae_test_${timestamp}.jsx`);
       
       // Create a direct test script that doesn't rely on command files
       let scriptContent = "";
